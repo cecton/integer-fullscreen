@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Build release
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target=x86_64-pc-windows-msvc
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-windows
+          path: |
+            target/x86_64-pc-windows-msvc/release/integer-fullscreen.exe
+
+  release:
+    needs: [build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-windows
+          path: build-windows
+      - run: |
+          mv build-windows/integer-fullscreen.exe build-windows/integer-fullscreen-${{ steps.get_version.outputs.VERSION }}.exe
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            build-windows/*
