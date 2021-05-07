@@ -186,8 +186,12 @@ fn toggle_fullscreen() {
                 (target_rect.bottom - target_rect.top),
             );
 
-            let (screen_w, screen_h, _, _, _) = current_display_settings(target_hwnd).unwrap();
-            println!("screen size: {}x{}", screen_w, screen_h);
+            let (screen_w, screen_h, _, (screen_x, screen_y), _) =
+                current_display_settings(target_hwnd).unwrap();
+            println!(
+                "screen size: {}x{}+{}+{}",
+                screen_w, screen_h, screen_x, screen_y
+            );
             let ratio_h = screen_w
                 .checked_div(u32::try_from(target_rect.right - target_rect.left).unwrap_or(0))
                 .unwrap_or(screen_w);
@@ -200,8 +204,8 @@ fn toggle_fullscreen() {
             SetWindowPos(
                 app.window,
                 HWND_TOPMOST,
-                0,
-                0,
+                screen_x,
+                screen_y,
                 screen_w as i32,
                 screen_h as i32,
                 SET_WINDOW_POS_FLAGS::SWP_SHOWWINDOW,
