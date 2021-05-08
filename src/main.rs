@@ -137,6 +137,10 @@ fn main() {
                     {
                         panic!("could not set layered window attributes");
                     }
+                    // NOTE: for some reason the event loop is consuming a lot of CPU if the window
+                    //       is not showed at least once
+                    ShowWindow(window, SHOW_WINDOW_CMD::SW_SHOW);
+                    ShowWindow(window, SHOW_WINDOW_CMD::SW_HIDE);
                     APP.set(App {
                         window,
                         h_instance,
